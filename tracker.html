@@ -14,19 +14,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #0A0A0F;
-            --surface: #15141B;
-            --surface-alt: #1C1B24;
-            --line: #302C38;
-            --text: #F3EFE4;
-            --muted: #948FA3;
-            --accent: #D9A945;
-            --accent-soft: #2B2314;
-            --accent-ink: #1C1404;
-            --danger: #C24D4D;
-            --danger-soft: #3A2020;
-            --success: #4E9F6E;
-            --success-soft: #1E2E22;
+            --bg: #F8F6F1;
+            --surface: #FFFFFF;
+            --surface-alt: #F1EDE3;
+            --line: #E2DCCB;
+            --text: #221F1A;
+            --muted: #83786A;
+            --accent: #A9761E;
+            --accent-soft: #FBF0D9;
+            --accent-ink: #FFFDF8;
+            --danger: #B23A3A;
+            --danger-soft: #FBEAEA;
+            --success: #2E7D4F;
+            --success-soft: #E7F4EC;
             --radius: 14px;
         }
 
@@ -93,7 +93,7 @@
             width: 100%;
             max-width: 280px;
             padding: 12px 16px;
-            background: var(--surface-alt);
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 10px;
             color: var(--text);
@@ -340,7 +340,7 @@
 
         .setup-note {
             background: var(--accent-soft);
-            border: 1px solid #4a3a1f;
+            border: 1px solid #E8D9AE;
             border-radius: 10px;
             padding: 16px 18px;
             font-size: 0.83rem;
@@ -408,7 +408,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="num" id="statPaid">—</div>
-                    <div class="lbl">Marked paid</div>
+                    <div class="lbl">Marked done</div>
                 </div>
                 <div class="stat-card">
                     <div class="num" id="statPending">—</div>
@@ -440,8 +440,7 @@
                         <div><label>Payment status</label>
                             <select id="f_status">
                                 <option value="Pending">Pending</option>
-                                <option value="Paid">Paid</option>
-                                <option value="Failed">Failed</option>
+                                <option value="Done">Done</option>
                             </select>
                         </div>
                         <div><label>Renewal date</label><input type="date" id="f_renewal"></div>
@@ -630,11 +629,10 @@
       <td>
         <select class="statusSelect" data-id="${c.id}" style="background:var(--surface-alt); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:0.78rem;">
           <option value="Pending" ${statusClass === "pending" ? "selected" : ""}>Pending</option>
-          <option value="Paid" ${statusClass === "paid" ? "selected" : ""}>Paid</option>
-          <option value="Failed" ${statusClass === "failed" ? "selected" : ""}>Failed</option>
+          <option value="Done" ${statusClass === "done" ? "selected" : ""}>Done</option>
         </select>
       </td>
-      <td class="mono">${escapeHtml(c.renewal_date)}</td>
+      <td>${renewalCellHtml(c.renewal_date)}</td>
       <td>${escapeHtml(c.notes)}</td>
       <td><button class="btn-secondary deleteBtn" data-id="${c.id}" style="padding:6px 12px; font-size:0.75rem; color:var(--danger); border-color:var(--danger);">Delete</button></td>
     </tr>`;
@@ -646,7 +644,16 @@
             document.querySelectorAll(".statusSelect").forEach(sel => {
                 sel.addEventListener("change", async (e) => {
                     const id = e.target.getAttribute("data-id");
-                    const { error } = await supabaseClient.from("customers").update({ payment_status: e.target.value }).eq("id", id);
+                    const newStatus = e.target.value;
+                    const updatePayload = { payment_status: newStatus };
+
+                    // Selecting "Done" automatically sets the renewal date 30 days out,
+                    // since every plan on this site is billed monthly.
+                    if (newStatus === "Done") {
+                        updatePayload.renewal_date = addDaysAsISODate(30);
+                    }
+
+                    const { error } = await supabaseClient.from("customers").update(updatePayload).eq("id", id);
                     if (error) { console.error(error); alert("Couldn't update status."); }
                     else { loadCustomers(); }
                 });
@@ -666,7 +673,7 @@
 
         function updateStats() {
             document.getElementById("statTotal").textContent = allCustomers.length;
-            document.getElementById("statPaid").textContent = allCustomers.filter(c => (c.payment_status || "").toLowerCase() === "paid").length;
+            document.getElementById("statPaid").textContent = allCustomers.filter(c => (c.payment_status || "").toLowerCase() === "done").length;
             document.getElementById("statPending").textContent = allCustomers.filter(c => (c.payment_status || "pending").toLowerCase() === "pending").length;
 
             const now = new Date();
@@ -685,6 +692,9 @@
             statusEl.className = "";
             statusEl.textContent = "Saving…";
 
+            const enteredRenewal = document.getElementById("f_renewal").value;
+            const enteredStatus = document.getElementById("f_status").value;
+
             const payload = {
                 name: document.getElementById("f_name").value.trim(),
                 phone: document.getElementById("f_phone").value.trim(),
@@ -693,8 +703,9 @@
                 plan: document.getElementById("f_plan").value.trim(),
                 price: document.getElementById("f_price").value.trim(),
                 subscription_email: document.getElementById("f_emailpref").value,
-                payment_status: document.getElementById("f_status").value,
-                renewal_date: document.getElementById("f_renewal").value || null,
+                payment_status: enteredStatus,
+                // If marking Done without picking a date yourself, default to 30 days out (monthly billing).
+                renewal_date: enteredRenewal || (enteredStatus === "Done" ? addDaysAsISODate(30) : null),
                 notes: document.getElementById("f_notes").value.trim()
             };
 
@@ -710,6 +721,37 @@
                 document.getElementById("addForm").reset();
                 loadCustomers();
             }
+        }
+
+        // Colors a renewal date red if it's overdue, amber if it's due within 3 days,
+        // so upcoming renewals are visible at a glance without checking each row.
+        // Returns today's date plus N days, formatted as YYYY-MM-DD for Postgres date columns.
+        function addDaysAsISODate(days) {
+            const d = new Date();
+            d.setDate(d.getDate() + days);
+            return d.toISOString().split("T")[0];
+        }
+
+        function renewalCellHtml(renewalDate) {
+            if (!renewalDate) return `<span class="mono" style="color:var(--muted);">—</span>`;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const renewal = new Date(renewalDate);
+            const daysUntil = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
+
+            let color = "var(--text)";
+            let label = escapeHtml(renewalDate);
+
+            if (daysUntil < 0) {
+                color = "var(--danger)";
+                label += ` (overdue)`;
+            } else if (daysUntil <= 3) {
+                color = "var(--accent)";
+                label += ` (${daysUntil === 0 ? "today" : daysUntil + "d left"})`;
+            }
+
+            return `<span class="mono" style="color:${color}; font-weight:${daysUntil <= 3 ? "600" : "400"};">${label}</span>`;
         }
 
         function escapeHtml(value) {
