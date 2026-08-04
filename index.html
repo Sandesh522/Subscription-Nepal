@@ -14,19 +14,19 @@
         rel="stylesheet">
     <style>
         :root {
-            --bg: #ECE6F7;
-            --surface: #FFFFFF;
-            --surface-alt: #F6F1FC;
-            --line: #DAD1EE;
-            --text: #241B3D;
-            --muted: #6E6690;
-            --accent: #DB8B22;
-            --accent-soft: #FBEACB;
-            --accent-ink: #2E1B04;
-            --maroon: #9C2B43;
+            --bg: #0A0A0F;
+            --surface: #15141B;
+            --surface-alt: #1C1B24;
+            --line: #302C38;
+            --text: #F3EFE4;
+            --muted: #948FA3;
+            --accent: #D9A945;
+            --accent-soft: #2B2314;
+            --accent-ink: #1C1404;
+            --maroon: #7A1F2B;
             --teal: #2D8F82;
             --radius: 18px;
-            --shadow: rgba(36, 27, 61, 0.14);
+            --shadow: rgba(0, 0, 0, 0.45);
         }
 
         * {
@@ -101,7 +101,7 @@
             position: sticky;
             top: 0;
             z-index: 50;
-            background: rgba(236, 230, 247, 0.86);
+            background: rgba(10, 10, 15, 0.86);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--line);
         }
@@ -110,6 +110,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            row-gap: 12px;
+            column-gap: 16px;
             padding: 16px 24px;
             max-width: 1180px;
             margin: 0 auto;
@@ -125,6 +128,12 @@
             white-space: nowrap;
         }
 
+        .brand-logo {
+            height: 34px;
+            width: auto;
+            display: block;
+        }
+
         .brand .dot {
             width: 10px;
             height: 10px;
@@ -135,7 +144,8 @@
 
         .nav-links {
             display: flex;
-            gap: 22px;
+            flex-wrap: wrap;
+            gap: 10px 18px;
             list-style: none;
         }
 
@@ -809,6 +819,18 @@
             border-top: 1px solid var(--line);
         }
 
+        .footer-signature {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 36px;
+        }
+
+        .footer-logo {
+            width: 150px;
+            height: auto;
+            opacity: 0.95;
+        }
+
         .footer-inner {
             max-width: 1180px;
             margin: 0 auto;
@@ -852,8 +874,8 @@
 
     <header>
         <nav>
-            <div class="brand"><span class="dot"></span> Premium <span style="color:var(--accent)">Hub Nepal</span>
-            </div>
+            <div class="brand"><img src="logo-icon.png" alt="Premium Hub Nepal crest logo" class="brand-logo"> Premium
+                <span style="color:var(--accent)">Hub Nepal</span></div>
             <ul class="nav-links">
                 <li><a href="#netflix">Netflix</a></li>
                 <li><a href="#prime">Prime Video</a></li>
@@ -1039,9 +1061,13 @@
     </section>
 
     <footer>
+        <div class="footer-signature">
+            <img src="logo-full.jpeg" alt="Premium Hub Nepal logo" class="footer-logo">
+        </div>
         <div class="footer-inner">
             <div>
-                <div class="brand" style="margin-bottom:10px;"><span class="dot"></span> Premium <span
+                <div class="brand" style="margin-bottom:10px;"><img src="logo-icon.png"
+                        alt="Premium Hub Nepal crest logo" class="brand-logo"> Premium <span
                         style="color:var(--accent)">Hub Nepal</span></div>
                 <p>Local pricing for the platforms you already use — Netflix, Spotify, Prime Video, YouTube Premium,
                     ChatGPT and Claude, made simple for Nepal.</p>
@@ -1098,10 +1124,10 @@
                 tag: "Movies & shows",
                 id: "netflix",
                 plans: [
-                    { name: "Mobile", desc: "480p · 1 mobile/tablet screen", basePrice: 149, baseCurrency: "INR", features: ["Stream on one mobile or tablet", "Standard definition (480p)"] },
-                    { name: "Basic", desc: "720p HD · TV compatible", basePrice: 199, baseCurrency: "INR", features: ["Works on TV, phone & laptop", "HD (720p) resolution"] },
-                    { name: "Standard", desc: "1080p Full HD · 2 screens at once", basePrice: 499, baseCurrency: "INR", features: ["Two screens at the same time", "Full HD (1080p)"] },
-                    { name: "Premium", desc: "4K Ultra HD · 4 screens at once", basePrice: 649, baseCurrency: "INR", features: ["Four screens at the same time", "4K Ultra HD + HDR"] }
+                    { name: "Mobile", desc: "480p · 1 mobile/tablet screen", basePrice: 149, baseCurrency: "INR", manualAddNPR: 100, features: ["Stream on one mobile or tablet", "Standard definition (480p)"] },
+                    { name: "Basic", desc: "720p HD · TV compatible", basePrice: 199, baseCurrency: "INR", manualAddNPR: 100, features: ["Works on TV, phone & laptop", "HD (720p) resolution"] },
+                    { name: "Standard", desc: "1080p Full HD · 2 screens at once", basePrice: 499, baseCurrency: "INR", manualAddNPR: 100, features: ["Two screens at the same time", "Full HD (1080p)"] },
+                    { name: "Premium", desc: "4K Ultra HD · 4 screens at once", basePrice: 649, baseCurrency: "INR", manualAddNPR: 150, features: ["Four screens at the same time", "4K Ultra HD + HDR"] }
                 ]
             },
             prime: {
@@ -1109,9 +1135,9 @@
                 tag: "Movies, shows & Prime perks",
                 id: "prime",
                 plans: [
-                    { name: "Monthly", desc: "Billed every month", basePrice: 299, baseCurrency: "INR", features: ["Full HD streaming", "Prime Video + Prime perks"] },
-                    { name: "Quarterly", desc: "Billed every 3 months", basePrice: 599, baseCurrency: "INR", features: ["Same features as monthly", "Better value than paying monthly"] },
-                    { name: "Annual", desc: "Billed once a year", basePrice: 1499, baseCurrency: "INR", features: ["Best per-month value", "Includes shopping + delivery perks"] }
+                    { name: "Monthly", desc: "Billed every month", basePrice: 299, baseCurrency: "INR", manualAddNPR: 0, features: ["Full HD streaming", "Prime Video + Prime perks"] },
+                    { name: "Quarterly", desc: "Billed every 3 months", basePrice: 599, baseCurrency: "INR", manualAddNPR: 0, features: ["Same features as monthly", "Better value than paying monthly"] },
+                    { name: "Annual", desc: "Billed once a year", basePrice: 1499, baseCurrency: "INR", manualAddNPR: 0, features: ["Best per-month value", "Includes shopping + delivery perks"] }
                 ]
             },
             spotify: {
@@ -1119,10 +1145,10 @@
                 tag: "Music & podcasts",
                 id: "spotify",
                 plans: [
-                    { name: "Student", desc: "Verified students only", basePrice: 69, baseCurrency: "INR", features: ["All Premium features", "Requires student verification"] },
-                    { name: "Individual", desc: "1 account", basePrice: 139, baseCurrency: "INR", features: ["Ad-free music", "Offline downloads"] },
-                    { name: "Duo", desc: "2 accounts, same address", basePrice: 179, baseCurrency: "INR", features: ["Two separate Premium accounts", "Duo Mix playlist"] },
-                    { name: "Family", desc: "Up to 6 accounts", basePrice: 229, baseCurrency: "INR", features: ["Up to 6 Premium accounts", "Each with their own library"] }
+                    { name: "Student", desc: "Verified students only", basePrice: 69, baseCurrency: "INR", manualAddNPR: 0, features: ["All Premium features", "Requires student verification"] },
+                    { name: "Individual", desc: "1 account", basePrice: 139, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free music", "Offline downloads"] },
+                    { name: "Duo", desc: "2 accounts, same address", basePrice: 179, baseCurrency: "INR", manualAddNPR: 0, features: ["Two separate Premium accounts", "Duo Mix playlist"] },
+                    { name: "Family", desc: "Up to 6 accounts", basePrice: 229, baseCurrency: "INR", manualAddNPR: 0, features: ["Up to 6 Premium accounts", "Each with their own library"] }
                 ]
             },
             ytpremium: {
@@ -1130,9 +1156,9 @@
                 tag: "Ad-free video & music",
                 id: "ytpremium",
                 plans: [
-                    { name: "Student", desc: "Verified students only", basePrice: 89, baseCurrency: "INR", features: ["Ad-free YouTube + Music", "Requires student verification"] },
-                    { name: "Individual", desc: "1 account", basePrice: 149, baseCurrency: "INR", features: ["Ad-free video & background play", "Includes YouTube Music Premium"] },
-                    { name: "Family", desc: "Up to 6 accounts", basePrice: 299, baseCurrency: "INR", features: ["Up to 6 members, same household", "Everyone gets their own account"] }
+                    { name: "Student", desc: "Verified students only", basePrice: 89, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free YouTube + Music", "Requires student verification"] },
+                    { name: "Individual", desc: "1 account", basePrice: 149, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free video & background play", "Includes YouTube Music Premium"] },
+                    { name: "Family", desc: "Up to 6 accounts", basePrice: 299, baseCurrency: "INR", manualAddNPR: 0, features: ["Up to 6 members, same household", "Everyone gets their own account"] }
                 ]
             },
             chatgpt: {
@@ -1140,7 +1166,7 @@
                 tag: "AI assistant",
                 id: "chatgpt",
                 plans: [
-                    { name: "Plus", desc: "Higher usage limits, faster responses", basePrice: 20, baseCurrency: "USD", features: ["Priority access during busy hours", "Access to the latest models"] }
+                    { name: "Plus", desc: "Higher usage limits, faster responses", basePrice: 20, baseCurrency: "USD", manualAddNPR: 0, features: ["Priority access during busy hours", "Access to the latest models"] }
                 ]
             },
             claude: {
@@ -1148,15 +1174,15 @@
                 tag: "AI assistant",
                 id: "claude",
                 plans: [
-                    { name: "Pro", desc: "Higher usage limits, priority access", basePrice: 20, baseCurrency: "USD", features: ["5x more usage than free", "Access to Claude Projects"] }
+                    { name: "Pro", desc: "Higher usage limits, priority access", basePrice: 20, baseCurrency: "USD", manualAddNPR: 0, features: ["5x more usage than free", "Access to Claude Projects"] }
                 ]
             }
         };
 
         /* ---------- Contact details — replace these with your real handles ---------- */
         const CONTACT = {
-            whatsappNumber: "9779800000000",   // replace with your WhatsApp number, country code first, no + or spaces
-            instagramHandle: "sastosubs_np"    // replace with your Instagram handle
+            whatsappNumber: "9779769403836",   // your real WhatsApp number, country code first, no + or spaces
+            instagramHandle: "premiumhubnepal2"    // your Instagram username (no @, no tracking params)
         };
 
         /* ========================= calculation + rendering ======================== */
@@ -1179,7 +1205,8 @@
             const converted = plan.basePrice * rate;
             const marginPct = getMarginPct(plan);
             const withMargin = converted * (1 + marginPct / 100);
-            return roundToStickerPrice(withMargin);
+            const withManualAdd = withMargin + (plan.manualAddNPR || 0); // optional flat top-up, e.g. Netflix +100/+150
+            return roundToStickerPrice(withManualAdd);
         }
 
         // Turns a raw number into a clean, familiar-looking price ending in 9
