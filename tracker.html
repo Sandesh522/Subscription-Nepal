@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Tracker — Premium Hub Nepal</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #0A0A0F;
+            --surface: #15141B;
+            --surface-alt: #1C1B24;
+            --line: #302C38;
+            --text: #F3EFE4;
+            --muted: #948FA3;
+            --accent: #D9A945;
+            --accent-soft: #2B2314;
+            --accent-ink: #1C1404;
+            --danger: #C24D4D;
+            --danger-soft: #3A2020;
+            --success: #4E9F6E;
+            --success-soft: #1E2E22;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Sora', sans-serif;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* ---------- gate screen ---------- */
+        #gate {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 18px;
+            padding: 24px;
+        }
+
+        #gate img {
+            height: 56px;
+            width: auto;
+            margin-bottom: 6px;
+        }
+
+        #gate h1 {
+            font-size: 1.3rem;
+        }
+
+        #gate p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 360px;
+        }
+
+        #gate input {
+            width: 100%;
+            max-width: 280px;
+            padding: 12px 16px;
+            background: var(--surface-alt);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        #gate button {
+            background: var(--accent);
+            color: var(--accent-ink);
+            font-weight: 700;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #gateError {
+            color: var(--danger);
+            font-size: 0.82rem;
+            display: none;
+        }
+
+        /* ---------- dashboard ---------- */
+        #dashboard {
+            display: none;
+        }
+
+        header.top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        header.top .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Sora';
+            font-weight: 700;
+        }
+
+        header.top .brand img {
+            height: 32px;
+            width: auto;
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            min-width: 140px;
+            flex: 1;
+        }
+
+        .stat-card .num {
+            font-family: 'IBM Plex Mono';
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .stat-card .lbl {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+        }
+
+        .add-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .add-grid label {
+            display: block;
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .add-grid input,
+        .add-grid select,
+        .add-grid textarea {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Inter';
+            font-size: 0.86rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: var(--accent-ink);
+            font-weight: 700;
+            font-size: 0.86rem;
+            padding: 11px 22px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--line);
+            font-weight: 600;
+            font-size: 0.82rem;
+            padding: 9px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #addStatus {
+            font-size: 0.82rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #addStatus.ok {
+            color: var(--success);
+        }
+
+        #addStatus.err {
+            color: var(--danger);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .toolbar input {
+            padding: 10px 14px;
+            background: var(--surface-alt);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.85rem;
+            min-width: 220px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: var(--surface-alt);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .badge.paid {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .badge.pending {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .badge.failed {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        #emptyState,
+        #loadingState {
+            text-align: center;
+            color: var(--muted);
+            padding: 40px 0;
+            font-size: 0.9rem;
+        }
+
+        #loadingState {
+            display: none;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .setup-note {
+            background: var(--accent-soft);
+            border: 1px solid #4a3a1f;
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-size: 0.83rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .setup-note code {
+            color: var(--accent);
+            font-family: 'IBM Plex Mono';
+        }
+
+        @media (max-width:640px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar input {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================================
+     REAL LOGIN — powered by Supabase Auth. This checks your
+     email/password against Supabase's servers, not just a value
+     sitting in this file's JavaScript. Only an account you created
+     in the Supabase dashboard can log in.
+     ============================================================ -->
+    <div id="gate">
+        <img src="logo-icon.png" alt="Premium Hub Nepal">
+        <h1>Customer Tracker</h1>
+        <p>Log in with the account you created in your Supabase dashboard.</p>
+        <input type="email" id="loginEmail" placeholder="Email" autofocus>
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button id="gateSubmit">Log in</button>
+        <p id="gateError">Incorrect email or password.</p>
+    </div>
+
+    <div id="dashboard">
+        <div class="wrap">
+            <header class="top">
+                <div class="brand"><img src="logo-icon.png" alt="Premium Hub Nepal"> Customer Tracker</div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" id="refreshBtn">Refresh data</button>
+                    <button class="btn-secondary" id="logoutBtn">Log out</button>
+                </div>
+            </header>
+
+            <div class="setup-note" id="setupNote">
+                <strong>One-time setup needed:</strong> paste your Supabase Project URL and anon key into
+                <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of the script in this file.
+                See the setup guide for exact steps.
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="num" id="statTotal">—</div>
+                    <div class="lbl">Total customers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="statPaid">—</div>
+                    <div class="lbl">Marked paid</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="statPending">—</div>
+                    <div class="lbl">Pending payment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="statThisMonth">—</div>
+                    <div class="lbl">Added this month</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Add a customer manually</h2>
+                <form id="addForm">
+                    <div class="add-grid">
+                        <div><label>Name</label><input type="text" id="f_name" required></div>
+                        <div><label>Phone</label><input type="text" id="f_phone" required></div>
+                        <div><label>Email</label><input type="email" id="f_email"></div>
+                        <div><label>Platform</label><input type="text" id="f_platform" placeholder="e.g. Netflix"
+                                required></div>
+                        <div><label>Plan</label><input type="text" id="f_plan" placeholder="e.g. Standard"></div>
+                        <div><label>Price (NPR)</label><input type="text" id="f_price" placeholder="e.g. 1119"></div>
+                        <div><label>Subscription email</label>
+                            <select id="f_emailpref">
+                                <option value="Use own email">Use own email</option>
+                                <option value="New email">New email</option>
+                            </select>
+                        </div>
+                        <div><label>Payment status</label>
+                            <select id="f_status">
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Failed">Failed</option>
+                            </select>
+                        </div>
+                        <div><label>Renewal date</label><input type="date" id="f_renewal"></div>
+                    </div>
+                    <div><label
+                            style="display:block; font-size:0.76rem; color:var(--muted); margin-bottom:5px;">Notes</label>
+                        <textarea id="f_notes" rows="2"
+                            style="width:100%; padding:9px 12px; background:var(--surface-alt); border:1px solid var(--line); border-radius:8px; color:var(--text); font-family:'Inter'; font-size:0.86rem;"></textarea>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <button type="submit" class="btn">Add customer</button>
+                    </div>
+                    <p id="addStatus"></p>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="toolbar">
+                    <h2 style="margin-bottom:0;">All customers</h2>
+                    <input type="text" id="searchBox" placeholder="Search name, phone, platform...">
+                </div>
+                <div id="loadingState">Loading customer data…</div>
+                <div id="emptyState">No customers yet. Add one above, or wait for your first website order to come in.
+                </div>
+                <div class="table-scroll">
+                    <table id="customerTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Date added</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Platform</th>
+                                <th>Plan</th>
+                                <th>Price</th>
+                                <th>Sub. email</th>
+                                <th>Status</th>
+                                <th>Renewal</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           CONFIG — the only two things you need to set up
+           -------------------------------------------------------------------------
+           1. SUPABASE_URL: your Project URL from Supabase → Settings → API
+           2. SUPABASE_ANON_KEY: your "anon public" key from the same page
+        
+           These two values are meant to be used in frontend code — they are not
+           secret passwords. What actually protects your data is the Row Level
+           Security policies you ran in supabase-setup.sql, which only let a
+           logged-in user read, update, or delete customer rows.
+           ========================================================================= */
+
+        const SUPABASE_URL = "https://ilmzabjjlvsaqmifpmuc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbXphYmpqbHZzYXFtaWZwbXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MTc3MzEsImV4cCI6MjEwMTM5MzczMX0.7Ewky3fya7EAqhMdYqexTr5b4_K40_KQCYDBmtXcZtE";
+
+        const supabaseClient = (SUPABASE_URL.includes("PASTE_YOUR")) ? null : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allCustomers = [];
+
+        /* ---------- login logic (real Supabase Auth) ---------- */
+        document.getElementById("gateSubmit").addEventListener("click", tryLogin);
+        document.getElementById("loginPassword").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") tryLogin();
+        });
+
+        async function tryLogin() {
+            if (!supabaseClient) {
+                document.getElementById("gateError").textContent = "Connect Supabase first — see the setup note.";
+                document.getElementById("gateError").style.display = "block";
+                return;
+            }
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                document.getElementById("gateError").textContent = "Incorrect email or password.";
+                document.getElementById("gateError").style.display = "block";
+                return;
+            }
+            showDashboard();
+        }
+
+        async function checkExistingSession() {
+            if (!supabaseClient) return;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                showDashboard();
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById("gate").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            initDashboard();
+        }
+
+        document.getElementById("logoutBtn").addEventListener("click", async () => {
+            await supabaseClient.auth.signOut();
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("gate").style.display = "flex";
+            document.getElementById("loginPassword").value = "";
+        });
+
+        /* ---------- dashboard logic ---------- */
+        function initDashboard() {
+            if (!supabaseClient) {
+                document.getElementById("setupNote").style.display = "block";
+                document.getElementById("loadingState").style.display = "none";
+                document.getElementById("emptyState").style.display = "block";
+                document.getElementById("emptyState").textContent = "Connect your Supabase project first — see the setup note above.";
+                return;
+            }
+            loadCustomers();
+            document.getElementById("refreshBtn").addEventListener("click", loadCustomers);
+            document.getElementById("searchBox").addEventListener("input", renderTable);
+            document.getElementById("addForm").addEventListener("submit", handleAddCustomer);
+        }
+
+        async function loadCustomers() {
+            document.getElementById("loadingState").style.display = "block";
+            document.getElementById("emptyState").style.display = "none";
+            document.getElementById("customerTable").style.display = "none";
+            try {
+                const { data, error } = await supabaseClient
+                    .from("customers")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+                allCustomers = data || [];
+                renderTable();
+                updateStats();
+            } catch (err) {
+                document.getElementById("loadingState").style.display = "none";
+                document.getElementById("emptyState").style.display = "block";
+                document.getElementById("emptyState").textContent = "Couldn't load data. Check your Supabase URL/key and that you're logged in.";
+                console.error(err);
+            }
+        }
+
+        function renderTable() {
+            const search = document.getElementById("searchBox").value.toLowerCase();
+            const filtered = allCustomers.filter(c => {
+                const haystack = `${c.name || ""} ${c.phone || ""} ${c.platform || ""} ${c.plan || ""}`.toLowerCase();
+                return haystack.includes(search);
+            });
+
+            document.getElementById("loadingState").style.display = "none";
+
+            if (filtered.length === 0) {
+                document.getElementById("emptyState").style.display = "block";
+                document.getElementById("emptyState").textContent = allCustomers.length === 0
+                    ? "No customers yet. Add one above, or wait for your first website order to come in."
+                    : "No matches for that search.";
+                document.getElementById("customerTable").style.display = "none";
+                return;
+            }
+
+            document.getElementById("emptyState").style.display = "none";
+            document.getElementById("customerTable").style.display = "table";
+
+            const rowsHtml = filtered.map(c => {
+                const statusClass = (c.payment_status || "Pending").toLowerCase();
+                const dateAdded = c.created_at ? new Date(c.created_at).toLocaleDateString() : "—";
+                return `<tr>
+      <td class="mono">${dateAdded}</td>
+      <td>${escapeHtml(c.name)}</td>
+      <td class="mono">${escapeHtml(c.phone)}</td>
+      <td>${escapeHtml(c.email)}</td>
+      <td>${escapeHtml(c.platform)}</td>
+      <td>${escapeHtml(c.plan)}</td>
+      <td class="mono">${escapeHtml(c.price)}</td>
+      <td>${escapeHtml(c.subscription_email)}</td>
+      <td>
+        <select class="statusSelect" data-id="${c.id}" style="background:var(--surface-alt); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:0.78rem;">
+          <option value="Pending" ${statusClass === "pending" ? "selected" : ""}>Pending</option>
+          <option value="Paid" ${statusClass === "paid" ? "selected" : ""}>Paid</option>
+          <option value="Failed" ${statusClass === "failed" ? "selected" : ""}>Failed</option>
+        </select>
+      </td>
+      <td class="mono">${escapeHtml(c.renewal_date)}</td>
+      <td>${escapeHtml(c.notes)}</td>
+      <td><button class="btn-secondary deleteBtn" data-id="${c.id}" style="padding:6px 12px; font-size:0.75rem; color:var(--danger); border-color:var(--danger);">Delete</button></td>
+    </tr>`;
+            }).join("");
+
+            document.getElementById("customerRows").innerHTML = rowsHtml;
+
+            // wire up inline status changes
+            document.querySelectorAll(".statusSelect").forEach(sel => {
+                sel.addEventListener("change", async (e) => {
+                    const id = e.target.getAttribute("data-id");
+                    const { error } = await supabaseClient.from("customers").update({ payment_status: e.target.value }).eq("id", id);
+                    if (error) { console.error(error); alert("Couldn't update status."); }
+                    else { loadCustomers(); }
+                });
+            });
+
+            // wire up delete buttons
+            document.querySelectorAll(".deleteBtn").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.getAttribute("data-id");
+                    if (!confirm("Delete this customer record? This can't be undone.")) return;
+                    const { error } = await supabaseClient.from("customers").delete().eq("id", id);
+                    if (error) { console.error(error); alert("Couldn't delete."); }
+                    else { loadCustomers(); }
+                });
+            });
+        }
+
+        function updateStats() {
+            document.getElementById("statTotal").textContent = allCustomers.length;
+            document.getElementById("statPaid").textContent = allCustomers.filter(c => (c.payment_status || "").toLowerCase() === "paid").length;
+            document.getElementById("statPending").textContent = allCustomers.filter(c => (c.payment_status || "pending").toLowerCase() === "pending").length;
+
+            const now = new Date();
+            const thisMonthCount = allCustomers.filter(c => {
+                if (!c.created_at) return false;
+                const d = new Date(c.created_at);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
+            document.getElementById("statThisMonth").textContent = thisMonthCount;
+        }
+
+        async function handleAddCustomer(e) {
+            e.preventDefault();
+            const statusEl = document.getElementById("addStatus");
+            statusEl.style.display = "block";
+            statusEl.className = "";
+            statusEl.textContent = "Saving…";
+
+            const payload = {
+                name: document.getElementById("f_name").value.trim(),
+                phone: document.getElementById("f_phone").value.trim(),
+                email: document.getElementById("f_email").value.trim(),
+                platform: document.getElementById("f_platform").value.trim(),
+                plan: document.getElementById("f_plan").value.trim(),
+                price: document.getElementById("f_price").value.trim(),
+                subscription_email: document.getElementById("f_emailpref").value,
+                payment_status: document.getElementById("f_status").value,
+                renewal_date: document.getElementById("f_renewal").value || null,
+                notes: document.getElementById("f_notes").value.trim()
+            };
+
+            const { error } = await supabaseClient.from("customers").insert([payload]);
+
+            if (error) {
+                statusEl.className = "err";
+                statusEl.textContent = "Couldn't save — check your connection and Supabase setup.";
+                console.error(error);
+            } else {
+                statusEl.className = "ok";
+                statusEl.textContent = "Customer added.";
+                document.getElementById("addForm").reset();
+                loadCustomers();
+            }
+        }
+
+        function escapeHtml(value) {
+            if (value === undefined || value === null) return "";
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        checkExistingSession();
+    </script>
+
+</body>
+
+</html>

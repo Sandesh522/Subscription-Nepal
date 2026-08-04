@@ -868,6 +868,7 @@
             max-width: 900px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -1172,6 +1173,48 @@
             instagramHandle: "premiumhubnepal2"    // your Instagram username (no @, no tracking params)
         };
 
+        /* =========================================================================
+           SUPABASE — automatic order logging
+           -------------------------------------------------------------------------
+           Paste the same SUPABASE_URL and SUPABASE_ANON_KEY you used in
+           tracker.html. Every time a customer clicks "Send details via WhatsApp"
+           or "Message us on Instagram", their details are also saved as a new row
+           in your customers table — automatically, with no extra step for them.
+           ========================================================================= */
+
+        const SUPABASE_URL = "https://ilmzabjjlvsaqmifpmuc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbXphYmpqbHZzYXFtaWZwbXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MTc3MzEsImV4cCI6MjEwMTM5MzczMX0.7Ewky3fya7EAqhMdYqexTr5b4_K40_KQCYDBmtXcZtE";
+
+        const supabaseClient = (SUPABASE_URL.includes("PASTE_YOUR")) ? null : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function logOrderToTracker() {
+            if (!supabaseClient) return; // silently skip if Supabase isn't configured yet
+            const name = document.getElementById("fullName").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const platformId = document.getElementById("platformSelect").value;
+            const planName = document.getElementById("planSelect").value;
+            const emailPref = document.querySelector('input[name="emailPref"]:checked').value;
+            const emailPrefLabel = emailPref === "new" ? "New email" : "Use own email";
+            const platform = PRICING_CONFIG[platformId];
+            const plan = platform.plans.find(p => p.name === planName);
+            const price = plan ? computeNprPrice(plan) : "";
+
+            try {
+                await supabaseClient.from("customers").insert([{
+                    name, phone, email,
+                    platform: platform.label,
+                    plan: planName,
+                    price: price ? `NPR ${price}` : "",
+                    subscription_email: emailPrefLabel,
+                    payment_status: "Pending",
+                    notes: "Auto-logged from website form"
+                }]);
+            } catch (err) {
+                console.error("Couldn't auto-log order:", err); // fails silently for the customer either way
+            }
+        }
+
         /* ========================= calculation + rendering ======================== */
 
         // The price shown everywhere is exactly whatever you typed into priceNPR.
@@ -1294,12 +1337,14 @@
                 if (!validateForm()) return;
                 const msg = buildMessage();
                 document.getElementById("toast").style.display = "block";
+                logOrderToTracker();
                 window.open(`https://wa.me/${CONTACT.whatsappNumber}?text=${msg}`, "_blank");
             });
 
             document.getElementById("sendInsta").addEventListener("click", (e) => {
                 if (!validateForm()) { e.preventDefault(); return; }
                 document.getElementById("toast").style.display = "block";
+                logOrderToTracker();
             });
         });
     </script>
