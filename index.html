@@ -1087,37 +1087,19 @@
 
     <script>
         /* =========================================================================
-           PRICING CONFIG — this is the ONLY place you should need to edit prices.
+           PRICING CONFIG — this is the ONLY place you need to edit prices.
            -------------------------------------------------------------------------
-           Every price on the site is shown in NPR only — nothing else is displayed
-           to visitors. Behind the scenes, each plan's official price is converted
-           once, then a margin is added on top, using two tiers:
+           No USD, no INR, no auto-conversion, no margin math. Every plan just has
+           a "priceNPR" field — type the exact Nepali Rupee price you want shown
+           on the site, save, refresh, and it's live everywhere (cards + the
+           dropdown in the request form + the WhatsApp/Instagram message).
         
-             Official price under Rs. 500   -> 40% margin
-             Official price Rs. 500 or more -> 30% margin
-        
-           Example:
-             Official price:            Rs. 149  (under 500, so 40% margin)
-             Converted to NPR (x1.60):  Rs. 238.4
-             Add margin (40%):          Rs. 238.4 + 95.36 = Rs. 333.76
-             Rounded to a clean price:  Rs. 329
-        
-           To change prices later: edit basePrice below, save, refresh — everything
-           recalculates. To change the margin tiers themselves, edit MARGIN_TIERS.
-           You can also force a specific margin on any single plan by adding
-           marginPctOverride: <number> to that plan's entry.
+           To add a new plan: copy an existing line inside a platform's "plans"
+           array and edit name / desc / priceNPR / features.
+           To remove a plan: delete its line.
+           To add a whole new platform: copy one of the blocks below (e.g. "prime")
+           and give it a new key, id, label and plans.
            ========================================================================= */
-
-        const CONVERSION_RATES = {
-            INR_TO_NPR: 1.60,  // fixed step used for all INR-priced plans
-            USD_TO_NPR: 139    // used only for ChatGPT/Claude, which are priced in USD
-        };
-
-        const MARGIN_TIERS = {
-            thresholdInINR: 500,   // the cutoff that decides which margin applies
-            belowThresholdPct: 40, // margin for plans priced under the threshold
-            atOrAboveThresholdPct: 30 // margin for plans priced at/above the threshold
-        };
 
         const PRICING_CONFIG = {
             netflix: {
@@ -1125,10 +1107,10 @@
                 tag: "Movies & shows",
                 id: "netflix",
                 plans: [
-                    { name: "Mobile", desc: "480p · 1 mobile/tablet screen", basePrice: 149, baseCurrency: "INR", manualAddNPR: 100, features: ["Stream on one mobile or tablet", "Standard definition (480p)"] },
-                    { name: "Basic", desc: "720p HD · TV compatible", basePrice: 199, baseCurrency: "INR", manualAddNPR: 100, features: ["Works on TV, phone & laptop", "HD (720p) resolution"] },
-                    { name: "Standard", desc: "1080p Full HD · 2 screens at once", basePrice: 499, baseCurrency: "INR", manualAddNPR: 100, features: ["Two screens at the same time", "Full HD (1080p)"] },
-                    { name: "Premium", desc: "4K Ultra HD · 4 screens at once", basePrice: 649, baseCurrency: "INR", manualAddNPR: 150, features: ["Four screens at the same time", "4K Ultra HD + HDR"] }
+                    { name: "Mobile", desc: "480p · 1 mobile/tablet screen", priceNPR: 429, features: ["Stream on one mobile or tablet", "Standard definition (480p)"] },
+                    { name: "Basic", desc: "720p HD · TV compatible", priceNPR: 549, features: ["Works on TV, phone & laptop", "HD (720p) resolution"] },
+                    { name: "Standard", desc: "1080p Full HD · 2 screens at once", priceNPR: 1219, features: ["Two screens at the same time", "Full HD (1080p)"] },
+                    { name: "Premium", desc: "4K Ultra HD · 4 screens at once", priceNPR: 1499, features: ["Four screens at the same time", "4K Ultra HD + HDR"] }
                 ]
             },
             prime: {
@@ -1136,9 +1118,9 @@
                 tag: "Movies, shows & Prime perks",
                 id: "prime",
                 plans: [
-                    { name: "Monthly", desc: "Billed every month", basePrice: 299, baseCurrency: "INR", manualAddNPR: 0, features: ["Full HD streaming", "Prime Video + Prime perks"] },
-                    { name: "Quarterly", desc: "Billed every 3 months", basePrice: 599, baseCurrency: "INR", manualAddNPR: 0, features: ["Same features as monthly", "Better value than paying monthly"] },
-                    { name: "Annual", desc: "Billed once a year", basePrice: 1499, baseCurrency: "INR", manualAddNPR: 0, features: ["Best per-month value", "Includes shopping + delivery perks"] }
+                    { name: "Monthly", desc: "Billed every month", priceNPR: 669, features: ["Full HD streaming", "Prime Video + Prime perks"] },
+                    { name: "Quarterly", desc: "Billed every 3 months", priceNPR: 1249, features: ["Same features as monthly", "Better value than paying monthly"] },
+                    { name: "Annual", desc: "Billed once a year", priceNPR: 3119, features: ["Best per-month value", "Includes shopping + delivery perks"] }
                 ]
             },
             spotify: {
@@ -1146,10 +1128,10 @@
                 tag: "Music & podcasts",
                 id: "spotify",
                 plans: [
-                    { name: "Student", desc: "Verified students only", basePrice: 69, baseCurrency: "INR", manualAddNPR: 0, features: ["All Premium features", "Requires student verification"] },
-                    { name: "Individual", desc: "1 account", basePrice: 139, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free music", "Offline downloads"] },
-                    { name: "Duo", desc: "2 accounts, same address", basePrice: 179, baseCurrency: "INR", manualAddNPR: 0, features: ["Two separate Premium accounts", "Duo Mix playlist"] },
-                    { name: "Family", desc: "Up to 6 accounts", basePrice: 229, baseCurrency: "INR", manualAddNPR: 0, features: ["Up to 6 Premium accounts", "Each with their own library"] }
+                    { name: "Individual", desc: "1 account", priceNPR: 309, features: ["Ad-free music", "Offline downloads"] },
+                    { name: "Duo", desc: "2 accounts, same address", priceNPR: 399, features: ["Two separate Premium accounts", "Duo Mix playlist"] },
+                    { name: "Family", desc: "Up to 6 accounts", priceNPR: 509, features: ["Up to 6 Premium accounts", "Each with their own library"] },
+                    { name: "Yearly", desc: "1 account · billed annually", priceNPR: 2569, features: ["Ad-free music, billed once a year", "Best value for a single account"] }
                 ]
             },
             ytpremium: {
@@ -1157,9 +1139,9 @@
                 tag: "Ad-free video & music",
                 id: "ytpremium",
                 plans: [
-                    { name: "Student", desc: "Verified students only", basePrice: 89, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free YouTube + Music", "Requires student verification"] },
-                    { name: "Individual", desc: "1 account", basePrice: 149, baseCurrency: "INR", manualAddNPR: 0, features: ["Ad-free video & background play", "Includes YouTube Music Premium"] },
-                    { name: "Family", desc: "Up to 6 accounts", basePrice: 299, baseCurrency: "INR", manualAddNPR: 0, features: ["Up to 6 members, same household", "Everyone gets their own account"] }
+                    { name: "Student", desc: "Verified students only", priceNPR: 199, features: ["Ad-free YouTube + Music", "Requires student verification"] },
+                    { name: "Individual", desc: "1 account", priceNPR: 329, features: ["Ad-free video & background play", "Includes YouTube Music Premium"] },
+                    { name: "Family", desc: "Up to 6 accounts", priceNPR: 669, features: ["Up to 6 members, same household", "Everyone gets their own account"] }
                 ]
             },
             chatgpt: {
@@ -1167,7 +1149,7 @@
                 tag: "AI assistant",
                 id: "chatgpt",
                 plans: [
-                    { name: "Plus", desc: "Higher usage limits, faster responses", basePrice: 20, baseCurrency: "USD", manualAddNPR: 0, features: ["Priority access during busy hours", "Access to the latest models"] }
+                    { name: "Plus", desc: "Higher usage limits, faster responses", priceNPR: 3859, features: ["Priority access during busy hours", "Access to the latest models"] }
                 ]
             },
             claude: {
@@ -1175,7 +1157,7 @@
                 tag: "AI assistant",
                 id: "claude",
                 plans: [
-                    { name: "Pro", desc: "Higher usage limits, priority access", basePrice: 20, baseCurrency: "USD", manualAddNPR: 0, features: ["5x more usage than free", "Access to Claude Projects"] }
+                    { name: "Pro", desc: "Higher usage limits, priority access", priceNPR: 3859, features: ["5x more usage than free", "Access to Claude Projects"] }
                 ]
             }
         };
@@ -1188,33 +1170,9 @@
 
         /* ========================= calculation + rendering ======================== */
 
-        // Works out which margin tier a plan falls into, based on its official
-        // price. USD plans are converted to an INR-equivalent first, purely so
-        // they can be compared against the same Rs. 500 threshold.
-        function getMarginPct(plan) {
-            if (typeof plan.marginPctOverride === "number") return plan.marginPctOverride;
-            const inrEquivalent = plan.baseCurrency === "USD"
-                ? plan.basePrice * (CONVERSION_RATES.USD_TO_NPR / CONVERSION_RATES.INR_TO_NPR)
-                : plan.basePrice;
-            return inrEquivalent < MARGIN_TIERS.thresholdInINR
-                ? MARGIN_TIERS.belowThresholdPct
-                : MARGIN_TIERS.atOrAboveThresholdPct;
-        }
-
+        // The price shown everywhere is exactly whatever you typed into priceNPR.
         function computeNprPrice(plan) {
-            const rate = plan.baseCurrency === "USD" ? CONVERSION_RATES.USD_TO_NPR : CONVERSION_RATES.INR_TO_NPR;
-            const converted = plan.basePrice * rate;
-            const marginPct = getMarginPct(plan);
-            const withMargin = converted * (1 + marginPct / 100);
-            const withManualAdd = withMargin + (plan.manualAddNPR || 0); // optional flat top-up, e.g. Netflix +100/+150
-            return roundToStickerPrice(withManualAdd);
-        }
-
-        // Turns a raw number into a clean, familiar-looking price ending in 9
-        // (e.g. 192 -> 189, 286 -> 289) instead of an odd number like 191.6 or 344.
-        function roundToStickerPrice(value) {
-            const nearestTen = Math.round(value / 10) * 10;
-            return nearestTen - 1;
+            return plan.priceNPR;
         }
 
         function barcodeHTML() {
